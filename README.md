@@ -1,0 +1,1 @@
+[Next OAS Specification](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/mi11y/next-oas/main/oas.yml)
