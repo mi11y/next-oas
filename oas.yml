@@ -2,63 +2,242 @@ openapi: 3.0.0
 info:
   version: 2.0.0
   title: Next API
-  description: An API for PDX Transit Data.
-
+  description: A modern API for obtaining transit data for the Portland, OR area.
 servers:
-  - url: https://127.0.0.1/v2
-
-# Basic authentication
-components:
-  securitySchemes:
-    BasicAuth:
-      type: http
-      scheme: basic
-security:
-  - BasicAuth: []
-
+  - url: https://example.io/v2
 paths:
-  /trimet:
+  /trimet_arrivals:
     get:
-     description: Returns a list of nearby Transit stops with corresponding arrivals and routes.
-     responses:
-      '200':
-        description: A successful repsonse return nearby Trimet stop IDs, with coreesponding arrivals and route information.
-        content:
-          application/json:
-            schema:
-              type: object
-              items:
-                type: object
-                required:
-                  - latitude
-                  - longitude
-                properties:
-                  dir:
-                    type: string
-                  desc:
-                    type: string
-                  arrivals:
-                    type: array
-                    items:
+      description: Returns arrivals for nearby Trimet stops including route information.
+      parameters:
+        - name: lat
+          in: query
+          description: The latitude coordinate of your location.
+          schema:
+            type: number
+        - name: lon
+          in: query
+          description: The longitude coordinate of your location.
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Successfully returns a list of nearby Trimet stops with arrival information.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - direction
+                    - description
+                  properties:
+                    direction:
+                      type: string
+                    description:
+                      type: string
+                    arrivals:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - route
+                          - full_sign
+                          - short_sign
+                          - route_info
+                        properties:
+                          route:
+                            type: string
+                          full_sign:
+                            type: string
+                          short_sign:
+                            type: string
+                          schedules:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                departed:
+                                  type: boolean
+                                scheduled:
+                                  type: string
+                                estimated_arrival:
+                                  type: string
+                          route_info:
+                            type: object
+                            required:
+                              - route_type
+                              - description
+                              - frequent_service
+                            properties:
+                              route_type:
+                                type: string
+                              description:
+                                type: string
+                              frequent_service:
+                                type: boolean
+                              route_color:
+                                type: string
+  /share_stations:
+    get:
+      description: Returns nearby micromobility docking stations and status
+      parameters:
+        - name: lat
+          in: query
+          description: The latitude coordinate of your location.
+          schema:
+            type: number
+        - name: lon
+          in: query
+          description: The longitude coordinate of your location.
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Successfully returns a list of nearby micromobility docking stations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    brand:
+                      type: string
+                    distance:
+                      type: integer
+                    latitude:
+                      type: string
+                    uuid:
+                      type: string
+                    name:
+                      type: string
+                    capacity:
+                      type: integer
+                    station_status:
                       type: object
                       properties:
-                        route:
+                        docks_available:
                           type: integer
-                        departed:
+                        accepts_returns:
                           type: boolean
-                        scheduled:
-                          type: string
-                        est_arrival:
-                          type: string
-                        full_sign:
-                          type: string
-                        short_sign:
-                          type: string
-                        route_info:
-                          type: object
-                          properties:
-                            route_number:
-                              type: integer
-                            route_id:
-                              type: integer
-                            route_type:
+                        vehicles_available:
+                          type: integer
+                        renting:
+                          type: boolean
+  /drive_times:
+    get:
+      description: Returns nearby ODOT drive time data from origins to destinations.
+      parameters:
+        - name: lat
+          in: query
+          description: The latitude coordinate of your location.
+          schema:
+            type: number
+        - name: lon
+          in: query
+          description: The longitude coordinate of your location.
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Successfully returns a list of nearby drive times to destinations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    origin_id:
+                      type: integer
+                    location_name:
+                      type: string
+                    direction:
+                      type: string
+                    cross_street:
+                      type: string
+                    highway_type:
+                      type: string
+                    latitude:
+                      type: string
+                    longitude:
+                      type: string
+                    destinations:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          destination_id:
+                            type: integer
+                          route_destination:
+                            type: string
+                          direction:
+                            type: string
+                          cross_street:
+                            type: string
+                          highway_type:
+                            type: string
+                          minimum_route_time:
+                            type: integer
+                          travel_time:
+                            type: integer
+                          delay:
+                            type: integer
+  /micromobility:
+    get:
+      description: Returns nearby micromobility devices (scooters, bikes and more).
+      #  ----- Added lines  ----------------------------------------
+      parameters:
+        - name: lat
+          in: query
+          description: The latitude coordinate of your location.
+          schema:
+            type: number
+        - name: lon
+          in: query
+          description: The longitude coordinate of your location.
+          schema:
+            type: number
+        - name: brand
+          in: query
+          description: The brand of micromobility device. Optional. Omit to return all available.
+          schema:
+            type: string
+      #  ---- /Added lines  ----------------------------------------
+      responses:
+        "200":
+          description: Successfully returns a list of nearby micromobility devices.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - distance
+                    - lat
+                    - lon
+                    - brand
+                    - uuid
+                  properties:
+                    distance:
+                      type: integer
+                    lat:
+                      type: string
+                    lon:
+                      type: string
+                    brand:
+                      type: string
+                    uuid:
+                      type: string
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
