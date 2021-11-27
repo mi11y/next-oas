@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  version: 2.0.0
+  title: Next API
+  description: An API for PDX Transit Data.
+
+servers:
+  - url: https://127.0.0.1/v2
+
+# Basic authentication
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+security:
+  - BasicAuth: []
+
+paths:
+  /trimet:
+    get:
+     description: Returns a list of nearby Transit stops with corresponding arrivals and routes.
+     responses:
+      '200':
+        description: A successful repsonse return nearby Trimet stop IDs, with coreesponding arrivals and route information.
+        content:
+          application/json:
+            schema:
+              type: object
+              items:
+                type: object
+                required:
+                  - latitude
+                  - longitude
+                properties:
+                  dir:
+                    type: string
+                  desc:
+                    type: string
+                  arrivals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        route:
+                          type: integer
+                        departed:
+                          type: boolean
+                        scheduled:
+                          type: string
+                        est_arrival:
+                          type: string
+                        full_sign:
+                          type: string
+                        short_sign:
+                          type: string
+                        route_info:
+                          type: object
+                          properties:
+                            route_number:
+                              type: integer
+                            route_id:
+                              type: integer
+                            route_type:
