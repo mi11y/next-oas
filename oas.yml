@@ -10,16 +10,8 @@ paths:
     get:
       description: Returns arrivals for nearby Trimet stops including route information.
       parameters:
-        - name: lat
-          in: query
-          description: The latitude coordinate of your location.
-          schema:
-            type: number
-        - name: lon
-          in: query
-          description: The longitude coordinate of your location.
-          schema:
-            type: number
+        - $ref: '#/components/parameters/Latitude'
+        - $ref: '#/components/parameters/Longitude'
       responses:
         "200":
           description: Successfully returns a list of nearby Trimet stops with arrival information.
@@ -83,16 +75,8 @@ paths:
     get:
       description: Returns nearby micromobility docking stations and status
       parameters:
-        - name: lat
-          in: query
-          description: The latitude coordinate of your location.
-          schema:
-            type: number
-        - name: lon
-          in: query
-          description: The longitude coordinate of your location.
-          schema:
-            type: number
+        - $ref: '#/components/parameters/Latitude'
+        - $ref: '#/components/parameters/Longitude'
       responses:
         "200":
           description: Successfully returns a list of nearby micromobility docking stations.
@@ -102,44 +86,13 @@ paths:
                 type: array
                 items:
                   type: object
-                  properties:
-                    brand:
-                      type: string
-                    distance:
-                      type: integer
-                    latitude:
-                      type: string
-                    uuid:
-                      type: string
-                    name:
-                      type: string
-                    capacity:
-                      type: integer
-                    station_status:
-                      type: object
-                      properties:
-                        docks_available:
-                          type: integer
-                        accepts_returns:
-                          type: boolean
-                        vehicles_available:
-                          type: integer
-                        renting:
-                          type: boolean
+                  $ref: '#/components/schemas/ShareStation'
   /drive_times:
     get:
       description: Returns nearby ODOT drive time data from origins to destinations.
       parameters:
-        - name: lat
-          in: query
-          description: The latitude coordinate of your location.
-          schema:
-            type: number
-        - name: lon
-          in: query
-          description: The longitude coordinate of your location.
-          schema:
-            type: number
+        - $ref: '#/components/parameters/Latitude'
+        - $ref: '#/components/parameters/Longitude'
       responses:
         "200":
           description: Successfully returns a list of nearby drive times to destinations.
@@ -148,58 +101,14 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    origin_id:
-                      type: integer
-                    location_name:
-                      type: string
-                    direction:
-                      type: string
-                    cross_street:
-                      type: string
-                    highway_type:
-                      type: string
-                    latitude:
-                      type: string
-                    longitude:
-                      type: string
-                    destinations:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          destination_id:
-                            type: integer
-                          route_destination:
-                            type: string
-                          direction:
-                            type: string
-                          cross_street:
-                            type: string
-                          highway_type:
-                            type: string
-                          minimum_route_time:
-                            type: integer
-                          travel_time:
-                            type: integer
-                          delay:
-                            type: integer
+                  $ref: '#/components/schemas/DriveTimes'
   /micromobility:
     get:
       description: Returns nearby micromobility devices (scooters, bikes and more).
       #  ----- Added lines  ----------------------------------------
       parameters:
-        - name: lat
-          in: query
-          description: The latitude coordinate of your location.
-          schema:
-            type: number
-        - name: lon
-          in: query
-          description: The longitude coordinate of your location.
-          schema:
-            type: number
+        - $ref: '#/components/parameters/Latitude'
+        - $ref: '#/components/parameters/Longitude'
         - name: brand
           in: query
           description: The brand of micromobility device. Optional. Omit to return all available.
@@ -214,30 +123,108 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  required:
-                    - distance
-                    - lat
-                    - lon
-                    - brand
-                    - uuid
-                  properties:
-                    distance:
-                      type: integer
-                    lat:
-                      type: string
-                    lon:
-                      type: string
-                    brand:
-                      type: string
-                    uuid:
-                      type: string
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              schema:
+                  $ref: '#/components/schemas/MicromobilityDevice'
+components:
+  schemas:
+    Distance:
+      type: object
+      required:
+        - distance
+      properties:
+        distance:
+          type: integer
+    Brand:
+      type: object
+      required:
+        - brand
+      properties:
+        brand:
+          type: string
+    Location:
+        type: object
+        required:
+            - lat
+            - lon
+        properties:
+            lat:
+              type: string
+            lon:
+              type: string
+    MicromobilityDevice:
+      allOf:
+        - $ref: '#/components/schemas/Distance'
+        - $ref: '#/components/schemas/Brand'
+        - $ref: '#/components/schemas/Location'
+        - required:
+            - uuid
+        - properties:
+            uuid:
+              type: string
+    HighwayProperties:
+      properties:
+        direction:
+          type: string
+        cross_street:
+          type: string
+        highway_type:
+          type: string
+    HighwayDestination:
+      allOf:
+        - $ref: '#/components/schemas/HighwayProperties'
+        - properties:
+            destination_id:
+              type: integer
+            route_destination:
+              type: string
+            minimum_route_time:
+              type: integer
+            travel_time:
+              type: integer
+            delay:
+              type: integer
+    DriveTime:
+      allOf:
+        - $ref: '#/components/schemas/Location'
+        - $ref: '#/components/schemas/HighwayProperties'
+        - properties:
+            origin_id:
+              type: integer
+            location_name:
+              type: string
+            destinations:
+              type: array
+              items:
                 type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/HighwayDestination'
+    ShareStation:
+      allOf:
+        - $ref: '#/components/schemas/MicromobilityDevice'
+        - properties:
+            name:
+              type: string
+            capacity:
+              type: integer
+            station_status:
+              type: object
+              properties:
+                docks_available:
+                  type: integer
+                accepts_returns:
+                  type: boolean
+                vehicles_available:
+                  type: integer
+                renting:
+                  type: boolean
+  parameters:
+    Latitude:
+      name: lat
+      in: query
+      description: The latitude coordinate of your location.
+      schema:
+        type: number
+    Longitude:
+      name: lon
+      in: query
+      description: The longitude coordinate of your location.
+      schema:
+        type: number
