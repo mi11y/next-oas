@@ -4,7 +4,7 @@ info:
   title: Next API
   description: A modern API for obtaining transit data for the Portland, OR area.
 servers:
-  - url: https://example.io/v2
+  - url: https://127.0.0.1/v2
 paths:
   /trimet_arrivals:
     get:
@@ -101,7 +101,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DriveTimes'
+                  $ref: '#/components/schemas/DriveTime'
   /micromobility:
     get:
       description: Returns nearby micromobility devices (scooters, bikes and more).
