@@ -10,6 +10,7 @@ paths:
     get:
       description: Returns arrivals for nearby Trimet stops including route information.
       parameters:
+        - $ref: '#/components/parameters/Radius'
         - $ref: '#/components/parameters/Latitude'
         - $ref: '#/components/parameters/Longitude'
       responses:
@@ -75,6 +76,7 @@ paths:
     get:
       description: Returns nearby micromobility docking stations and status
       parameters:
+        - $ref: '#/components/parameters/Radius'
         - $ref: '#/components/parameters/Latitude'
         - $ref: '#/components/parameters/Longitude'
       responses:
@@ -91,6 +93,7 @@ paths:
     get:
       description: Returns nearby ODOT drive time data from origins to destinations.
       parameters:
+        - $ref: '#/components/parameters/Radius'
         - $ref: '#/components/parameters/Latitude'
         - $ref: '#/components/parameters/Longitude'
       responses:
@@ -107,6 +110,7 @@ paths:
       description: Returns nearby micromobility devices (scooters, bikes and more).
       #  ----- Added lines  ----------------------------------------
       parameters:
+        - $ref: '#/components/parameters/Radius'
         - $ref: '#/components/parameters/Latitude'
         - $ref: '#/components/parameters/Longitude'
         - name: brand
@@ -226,5 +230,11 @@ components:
       name: lon
       in: query
       description: The longitude coordinate of your location.
+      schema:
+        type: number
+    Radius:
+      name: radius
+      in: query
+      description: The radius around Latitude and Longitude to include in the query. Omit to request all.
       schema:
         type: number
